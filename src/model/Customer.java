@@ -52,7 +52,7 @@ public class Customer extends Person {
 
             //order done!
             setCustomerState(CustomerState.PLACED_ORDER);
-            System.out.println(pName + " placed order");
+            System.out.println(pName + " placed order: " + order.toString());
 
             Cook cook = restaurant.getAvailableCook();
             while (cook == null) {//TODO test
@@ -65,15 +65,22 @@ public class Customer extends Person {
                 cook = restaurant.getAvailableCook();
             }
             cook.setCookState(CookState.COOK_RECEIVED_ORDER);
-            System.out.println(cook.getPName() + " accepted " + getPName() + "'s order");//TODO
-
-            System.out.println(getPName() + " is eating ....");
+            System.out.println(cook.getPName() + " accepted " + getPName() + "'s order");
+            synchronized (order) {
+                try {
+                    order.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            cook.setCookState(CookState.COOK_STARTING);//TODO must be in Cook
+            System.out.println(getPName() + " getting order and is eating it....");
             try {
                 restaurant.wait(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            cook.setCookState(CookState.COOK_STARTING);//TODO must be in Cook
+
             System.out.println(getPName() + " finished and gonna go out.. so the total will be:" + (totalCustomersInRestaurant - 1));
             totalCustomersInRestaurant--;
             if (totalCustomersInRestaurant == 0) {

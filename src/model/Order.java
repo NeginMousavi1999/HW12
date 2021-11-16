@@ -17,7 +17,6 @@ public class Order {
 
     public Order(int id, Map<FoodType, Integer> foods) {
         this.id = id;
-        this.customer = customer;
         this.foods = foods;
     }
 
