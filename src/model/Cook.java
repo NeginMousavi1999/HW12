@@ -46,11 +46,11 @@ public class Cook extends Person {
                 Integer countB = order.getFoods().get(FoodType.B);
                 while (true) {
                     while (countA != 0) {
-                        prepareFood(FoodType.A, countA);
+                        countA = prepareFood(FoodType.A, countA);
                     }
 
                     while (countB != 0) {
-                        prepareFood(FoodType.B, countB);
+                        countB = prepareFood(FoodType.B, countB);
                     }
                     if (countA == 0 && countB == 0)
                         break;
@@ -76,7 +76,7 @@ public class Cook extends Person {
     }
 
 
-    public synchronized void prepareFood(FoodType foodType, int count) {
+    public synchronized int prepareFood(FoodType foodType, int count) {
         System.out.println("type " + foodType);
         Machine machine = restaurant.getAvailableSameTypeMachine(foodType);
         while (machine == null) {
@@ -108,7 +108,7 @@ public class Cook extends Person {
             System.out.println(pName + " waiting");
             try {
 //                                restaurant.notify();
-//                                restaurant.notifyAll();
+//                restaurant.notifyAll();
                 restaurant.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -117,5 +117,6 @@ public class Cook extends Person {
         }
         cookState = CookState.COOK_FINISHED_FOOD;
         System.out.println(count);
+        return count;
     }
 }

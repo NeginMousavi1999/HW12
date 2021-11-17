@@ -71,7 +71,7 @@ public class Customer extends Person {
             while (!order.isWakeCustomerByCook()) {
                 System.out.println(pName + " wait for getting order");
                 try {
-//                    restaurant.notify();
+                    restaurant.notify();
                     restaurant.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
