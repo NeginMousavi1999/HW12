@@ -36,7 +36,7 @@ public class Customer extends Person {
     public void run() {
         this.customerState = CustomerState.CUSTOMER_STARTING;
         synchronized (restaurant) {
-//            restaurant.notifyAll();
+            restaurant.notifyAll();
             while (restaurant.getCapacity() <= totalCustomersInRestaurant) {
                 try {
                     System.out.println(pName + " wanted to entered but Restaurant is full... so please wait until someone leave");
@@ -69,11 +69,14 @@ public class Customer extends Person {
             cook.setCookState(CookState.COOK_RECEIVED_ORDER);
 
             while (!order.isWakeCustomerByCook()) {
+                System.out.println(pName + " wait for getting order");
                 try {
+//                    restaurant.notify();
                     restaurant.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                System.out.println(pName + " waking");
             }
             customerState = CustomerState.CUSTOMER_RECEIVED_ORDER;
             System.out.println(getPName() + " getting order and is eating it....");

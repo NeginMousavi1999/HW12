@@ -3,6 +3,7 @@ package model;
 
 import enums.CookState;
 import enums.FoodType;
+import enums.MachineState;
 import enums.RestaurantState;
 import lombok.Data;
 
@@ -36,22 +37,28 @@ public class Restaurant {
         cooks.add(new Cook(2, "Cook2", this));
         cooks.add(new Cook(3, "Cook3", this));
 
-        machines.add(new Machine(1, "Machine1", 2, FoodType.A));
-        machines.add(new Machine(2, "Machine2", 1, FoodType.B));
+        machines.add(new Machine(1, "Machine1", 2, FoodType.A, this));
+        machines.add(new Machine(2, "Machine2", 1, FoodType.B, this));
 
         customers.forEach(Thread::start);
         cooks.forEach(Thread::start);
         machines.forEach(Thread::start);
     }
 
-    public Integer getCustomerCount() {
-        return Customer.getTotalCustomersInRestaurant();
-    }
 
     public synchronized Cook getAvailableCook() {
         for (Cook cook : cooks) {
             if (cook.getCookState().equals(CookState.COOK_STARTING))
                 return cook;
+        }
+        return null;
+    }
+
+    public synchronized Machine getAvailableSameTypeMachine(FoodType foodType) {
+        for (Machine machine : machines) {
+            if ((machine.getMachineState().equals(MachineState.MACHINE_STARTING) || machine.getCapability() > machine.getCountOfFoods())
+                    && machine.getFoodTypes().equals(foodType))
+                return machine;
         }
         return null;
     }

@@ -16,6 +16,7 @@ public class Order {
     private Map<FoodType, Integer> foods;
     private String customerName;
     private boolean wakeCustomerByCook = false;
+    private boolean wakeCookByMachine = false;
 
     public Order(int id, Map<FoodType, Integer> foods) {
         this.id = id;
