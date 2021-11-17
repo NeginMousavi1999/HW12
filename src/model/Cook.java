@@ -6,9 +6,6 @@ import enums.MachineState;
 import enums.RestaurantState;
 import lombok.Data;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * @author Negin Mousavi
  */
@@ -61,7 +58,7 @@ public class Cook extends Person {
                 setCookState(CookState.COOK_STARTING);
                 order.setWakeCustomerByCook(true);
                 order = null;
-                restaurant.notify();
+                restaurant.notifyAll();
             }
         }
     }
@@ -97,18 +94,15 @@ public class Cook extends Person {
         if (count > machine.getCapability()) {
             machine.setCountOfFoods(machine.getCapability());
             count -= machine.getCapability();
-            System.out.println("log bigger");
         } else {
             machine.setCountOfFoods(count);
             count = 0;
-            System.out.println("logging else");
         }
 
         while (machine.getCountOfFoods() != 0) {
             System.out.println(pName + " waiting");
             try {
-//                                restaurant.notify();
-//                restaurant.notifyAll();
+
                 restaurant.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -116,7 +110,6 @@ public class Cook extends Person {
             System.out.println(pName + " waking");
         }
         cookState = CookState.COOK_FINISHED_FOOD;
-        System.out.println(count);
         return count;
     }
 }

@@ -72,7 +72,7 @@ public class Machine extends Thread {
                 System.out.println(mName + " done food :)");
                 setMachineState(MachineState.MACHINE_DONE_FOOD);
                 countOfFoods = 0;
-                restaurant.notify();
+                restaurant.notifyAll();
             }
         }
     }
