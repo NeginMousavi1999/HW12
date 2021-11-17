@@ -46,93 +46,16 @@ public class Cook extends Person {
                 Integer countB = order.getFoods().get(FoodType.B);
                 while (true) {
                     while (countA != 0) {
-                        System.out.println("type A");
-                        Machine machine = restaurant.getAvailableSameTypeMachine(FoodType.A);
-                        while (machine == null) {
-                            System.out.println(pName + " is waiting because we have no available machine");
-                            try {
-//                                restaurant.notify();
-                                restaurant.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            machine = restaurant.getAvailableSameTypeMachine(FoodType.A);
-                        }
-
-                        //find machine with capacity and A type
-                        System.out.println(machine.getMName() + " found and gonna make A:" + countA);
-                        System.out.println(getPName() + " is preparing order so it takes time...");
-                        machine.setMachineState(MachineState.MACHINE_STARTING_FOOD);
-                        if (countA > machine.getCapability()) {
-                            machine.setCountOfFoods(machine.getCapability());
-                            countA -= machine.getCapability();
-                            System.out.println("logging countA > machine.getCapability()");
-                        } else {
-                            machine.setCountOfFoods(countA);
-                            countA = 0;
-                            System.out.println("logging else");
-                        }
-
-                        while (machine.getCountOfFoods() != 0) {
-                            System.out.println(pName + " waiting");
-                            try {
-//                                restaurant.notify();
-//                                restaurant.notifyAll();
-                                restaurant.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            System.out.println(pName + " waking");
-                        }
-                        cookState = CookState.COOK_FINISHED_FOOD;
-                        System.out.println(countA);
+                        prepareFood(FoodType.A, countA);
                     }
 
                     while (countB != 0) {
-                        System.out.println("type B");
-                        Machine machine = restaurant.getAvailableSameTypeMachine(FoodType.B);
-                        while (machine == null) {
-                            System.out.println(pName + " is waiting because we have no available machine");
-                            try {
-//                                restaurant.notify();
-                                restaurant.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            machine = restaurant.getAvailableSameTypeMachine(FoodType.B);
-                        }
-
-                        //find machine with capacity and B type
-                        System.out.println(machine.getMName() + " found and gonna make B:" + countB);
-                        System.out.println(getPName() + " is preparing order so it takes time...");
-                        machine.setMachineState(MachineState.MACHINE_STARTING_FOOD);
-                        if (countB > machine.getCapability()) {
-                            machine.setCountOfFoods(machine.getCapability());
-                            countB -= machine.getCapability();
-                            System.out.println("logging countB > machine.getCapability()");
-                        } else {
-                            machine.setCountOfFoods(countB);
-                            countB = 0;
-                            System.out.println("logging else");
-                        }
-
-                        while (machine.getCountOfFoods() != 0) {
-                            System.out.println(pName + " waiting");
-                            try {
-//                                restaurant.notify();
-//                                restaurant.notifyAll();
-                                restaurant.wait();
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                            System.out.println(pName + " waking");
-                        }
-                        cookState = CookState.COOK_FINISHED_FOOD;
-                        System.out.println(countB);
+                        prepareFood(FoodType.B, countB);
                     }
                     if (countA == 0 && countB == 0)
                         break;
                 }
+
                 setCookState(CookState.COOK_COMPLETED_ORDER);
                 System.out.println(order.getCustomerName() + "'s order is ready");
                 setCookState(CookState.COOK_STARTING);
@@ -153,24 +76,46 @@ public class Cook extends Person {
     }
 
 
-    public synchronized Machine getMachineToCookThisType(List<Machine> availableMachines, Order order) throws InterruptedException {
-        if (availableMachines.isEmpty()) {
-            System.out.println("we have n't free machine to cook your food... so please wait");
-            availableMachines.wait();
-            return null;
-        }
-        for (Machine machine : availableMachines) {
-            Map<FoodType, Integer> foods = order.getFoods();
-            for (int i = 0; i < foods.size(); i++) {
-                if (!foods.get(machine.getFoodTypes()).equals(0)) {
-                    cookState = CookState.COOK_STARTED_FOOD;
-                    return machine;
-                }
+    public synchronized void prepareFood(FoodType foodType, int count) {
+        System.out.println("type " + foodType);
+        Machine machine = restaurant.getAvailableSameTypeMachine(foodType);
+        while (machine == null) {
+            System.out.println(pName + " is waiting because we have no available machine");
+            try {
+//                                restaurant.notify();
+                restaurant.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            machine = restaurant.getAvailableSameTypeMachine(foodType);
         }
-        System.out.println("we have n't machine to cook this type of food now... so please wait");
 
-        availableMachines.wait();
-        return null;
+        //find machine with capacity and A,B type
+        System.out.println(machine.getMName() + " found and gonna make " + foodType + ":" + count);
+        System.out.println(getPName() + " is preparing order so it takes some time...");
+        machine.setMachineState(MachineState.MACHINE_STARTING_FOOD);
+        if (count > machine.getCapability()) {
+            machine.setCountOfFoods(machine.getCapability());
+            count -= machine.getCapability();
+            System.out.println("log bigger");
+        } else {
+            machine.setCountOfFoods(count);
+            count = 0;
+            System.out.println("logging else");
+        }
+
+        while (machine.getCountOfFoods() != 0) {
+            System.out.println(pName + " waiting");
+            try {
+//                                restaurant.notify();
+//                                restaurant.notifyAll();
+                restaurant.wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(pName + " waking");
+        }
+        cookState = CookState.COOK_FINISHED_FOOD;
+        System.out.println(count);
     }
 }
