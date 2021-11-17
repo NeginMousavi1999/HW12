@@ -5,8 +5,6 @@ import enums.CustomerState;
 import enums.RestaurantState;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @author Negin Mousavi
  */
@@ -38,6 +36,7 @@ public class Customer extends Person {
     public void run() {
         this.customerState = CustomerState.CUSTOMER_STARTING;
         synchronized (restaurant) {
+//            restaurant.notifyAll();
             while (restaurant.getCapacity() <= totalCustomersInRestaurant) {
                 try {
                     System.out.println(pName + " wanted to entered but Restaurant is full... so please wait until someone leave");
@@ -48,14 +47,14 @@ public class Customer extends Person {
                 }
             }
             totalCustomersInRestaurant++;
+            customerState = CustomerState.CUSTOMER_ENTERED;
             System.out.println(pName + " entered to restaurant");
 
-            //order done!
-            setCustomerState(CustomerState.PLACED_ORDER);
+            setCustomerState(CustomerState.CUSTOMER_PLACED_ORDER);
             System.out.println(pName + " placed order: " + order.toString());
 
             Cook cook = restaurant.getAvailableCook();
-            while (cook == null) {//TODO test
+            while (cook == null) {
                 System.out.println(pName + " is waiting because we have no available cook");
                 try {
                     restaurant.wait();
@@ -64,29 +63,32 @@ public class Customer extends Person {
                 }
                 cook = restaurant.getAvailableCook();
             }
+
+            cook.setOrder(order);
+            System.out.println(cook.getPName() + ":" + cook.getOrder());
             cook.setCookState(CookState.COOK_RECEIVED_ORDER);
-            System.out.println(cook.getPName() + " accepted " + getPName() + "'s order");
-            synchronized (order) {
+
+            while (!order.isWakeCustomerByCook()) {
                 try {
-                    order.wait();
+                    restaurant.wait();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            cook.setCookState(CookState.COOK_STARTING);//TODO must be in Cook
+            customerState = CustomerState.CUSTOMER_RECEIVED_ORDER;
             System.out.println(getPName() + " getting order and is eating it....");
             try {
                 restaurant.wait(2000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-
+            customerState = CustomerState.CUSTOMER_LEAVING;
             System.out.println(getPName() + " finished and gonna go out.. so the total will be:" + (totalCustomersInRestaurant - 1));
             totalCustomersInRestaurant--;
+            restaurant.notifyAll();
             if (totalCustomersInRestaurant == 0) {
-                restaurant.setRestaurantState(RestaurantState.CLOSE);
+                restaurant.close();
             }
-            restaurant.notify();
         }
     }
 }

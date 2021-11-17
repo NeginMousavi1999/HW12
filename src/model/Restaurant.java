@@ -7,9 +7,7 @@ import enums.RestaurantState;
 import lombok.Data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author Negin Mousavi
@@ -30,6 +28,9 @@ public class Restaurant {
         customers.add(new Customer(4, "Costumer4", this, create.getC4Order()));
         customers.add(new Customer(5, "Costumer5", this, create.getC5Order()));
         customers.add(new Customer(6, "Costumer6", this, create.getC6Order()));
+        for (Customer customer : customers)
+            customer.getOrder().setCustomerName(customer.getPName());
+
 
         cooks.add(new Cook(1, "Cook1", this));
         cooks.add(new Cook(2, "Cook2", this));
@@ -52,7 +53,11 @@ public class Restaurant {
             if (cook.getCookState().equals(CookState.COOK_STARTING))
                 return cook;
         }
-//        return cooks.stream().filter(c->c.getCookState().equals(CookState.COOK_STARTING)).findAny().get();
         return null;
+    }
+
+    public void close() {
+        setRestaurantState(RestaurantState.CLOSE);
+        System.out.println("restaurant is close. bye bye ^_^");
     }
 }

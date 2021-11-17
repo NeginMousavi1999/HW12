@@ -2,6 +2,7 @@ package model;
 
 import enums.CookState;
 import enums.FoodType;
+import enums.RestaurantState;
 import lombok.Data;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class Cook extends Person {
     private CookState cookState;
     private Order order;
+//    private Integer orderToAccept = 0;
 
     public Cook(int rId, String rName, Restaurant restaurant) {
         super(rId, rName, restaurant);
@@ -22,6 +24,32 @@ public class Cook extends Person {
     @Override
     public void run() {
         this.cookState = CookState.COOK_STARTING;
+        mainLoop:
+        while (true) {
+            synchronized (restaurant) {
+                while (order == null) {
+                    if (restaurant.getRestaurantState().equals(RestaurantState.CLOSE))
+                        break mainLoop;
+                    try {
+                        restaurant.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                System.out.println(getPName() + " accepted " + order.getCustomerName() + "'s order");
+                System.out.println(getPName() + " is preparing order so it takes time...");
+                try {
+                    sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                System.out.println(order.getCustomerName() + "'s order is ready");
+                setCookState(CookState.COOK_STARTING);
+                order.setWakeCustomerByCook(true);
+                order = null;
+                restaurant.notify();
+            }
+        }
     }
 
     @Override
