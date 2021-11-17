@@ -19,10 +19,6 @@ public class Customer extends Person {
         this.order = order;
     }
 
-    public static Integer getTotalCustomersInRestaurant() {
-        return totalCustomersInRestaurant;
-    }
-
     @Override
     public String toString() {
         return "Customer{" +

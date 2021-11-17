@@ -1,6 +1,5 @@
 package model;
 
-import enums.CookState;
 import enums.FoodType;
 import enums.MachineState;
 import enums.RestaurantState;
@@ -55,7 +54,6 @@ public class Machine extends Thread {
                         break mainLoop;
                     try {
                         System.out.println(mName + ": no food yet for me");
-//                        restaurant.notifyAll();
                         restaurant.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();

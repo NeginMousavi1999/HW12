@@ -19,6 +19,15 @@ public class Cook extends Person {
     }
 
     @Override
+    public String toString() {
+        return "Cook{" +
+                super.toString() +
+                ", cookState=" + cookState +
+                ", order=" + order +
+                '}';
+    }
+
+    @Override
     public void run() {
         this.cookState = CookState.COOK_STARTING;
         mainLoop:
@@ -30,14 +39,13 @@ public class Cook extends Person {
                         break mainLoop;
                     try {
                         System.out.println(pName + ": no order yet for me");
-//                        restaurant.notify();
                         restaurant.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
                 System.out.println(getPName() + " accepted " + order.getCustomerName() + "'s order");
-
+                cookState = CookState.COOK_STARTED_FOOD;
 
                 Integer countA = order.getFoods().get(FoodType.A);
                 Integer countB = order.getFoods().get(FoodType.B);
@@ -63,23 +71,12 @@ public class Cook extends Person {
         }
     }
 
-    @Override
-    public String toString() {
-        return "Cook{" +
-                super.toString() +
-                ", cookState=" + cookState +
-                ", order=" + order +
-                '}';
-    }
-
-
     public synchronized int prepareFood(FoodType foodType, int count) {
         System.out.println("type " + foodType);
         Machine machine = restaurant.getAvailableSameTypeMachine(foodType);
         while (machine == null) {
             System.out.println(pName + " is waiting because we have no available machine");
             try {
-//                                restaurant.notify();
                 restaurant.wait();
             } catch (InterruptedException e) {
                 e.printStackTrace();
